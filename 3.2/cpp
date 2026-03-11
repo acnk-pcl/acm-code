@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define fi first
+#define se second
+#define endl '\n'
+using namespace std;
+ 
+using ll = long long;
+using pii = pair<int, int>;
+using vi = vector<int>;
+
+struct all{
+    deque<char>str;
+};
+
+void pre(){} 
+ 
+void solve (){
+    int n,m,s;cin >> n >> m >> s;
+    vector<all> a(n+1);
+    for(int i = 1 ; i <= n ; i++){
+        for(int j = 1 ; j <= m ; j ++){
+            char c; cin >> c;
+            a[i].str.pb(c);
+        }
+    }
+
+    vector<char>ans;
+    stack<char>k;
+    
+    int t;
+    while(cin >> t){
+        if(t == -1) break;
+
+        if(t == 0){
+            if(k.size() == 0) continue;
+            ans.pb(k.top()); k.pop();
+        }
+        else{
+            if(t < 1 || t > n) continue;
+            if(a[t].str.empty()) continue;
+
+            if(k.size() == s){
+                ans.pb(k.top()); k.pop();
+            }
+
+            char temp = a[t].str.front();
+            a[t].str.pop_front();
+            k.push(temp);
+        }
+    }
+
+    for(auto p:ans){
+        cout << p;
+    }
+}
+ 
+signed main () {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    pre();
+    int t = 1;
+    //cin >> t;
+    while(t--) solve();
+    return 0;
+}
