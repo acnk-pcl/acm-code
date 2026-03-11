@@ -11,6 +11,7 @@ using pii = pair<int, int>;
 using vi = vector<int>;
 
 // 线段树模板 - 支持区间加、区间求和、懒标记
+// 使用 l, r 表示左右子节点 (l = 2*node, r = 2*node+1)
 class SegmentTree {
 private:
     vector<ll> tree, lazy;
@@ -21,9 +22,10 @@ private:
             tree[node] = arr[start];
         } else {
             int mid = (start + end) / 2;
-            build(arr, 2*node, start, mid);
-            build(arr, 2*node+1, mid+1, end);
-            tree[node] = tree[2*node] + tree[2*node+1];
+            int l = 2 * node, r = 2 * node + 1;
+            build(arr, l, start, mid);
+            build(arr, r, mid+1, end);
+            tree[node] = tree[l] + tree[r];
         }
     }
     
@@ -31,36 +33,39 @@ private:
         if (lazy[node] != 0) {
             tree[node] += (end - start + 1) * lazy[node];
             if (start != end) {
-                lazy[2*node] += lazy[node];
-                lazy[2*node+1] += lazy[node];
+                int l = 2 * node, r = 2 * node + 1;
+                lazy[l] += lazy[node];
+                lazy[r] += lazy[node];
             }
             lazy[node] = 0;
         }
     }
     
-    void update_range(int node, int start, int end, int l, int r, ll val) {
+    void update_range(int node, int start, int end, int L, int R, ll val) {
         push(node, start, end);
-        if (start > r || end < l) return;
-        if (start >= l && end <= r) {
+        if (start > R || end < L) return;
+        if (start >= L && end <= R) {
             lazy[node] += val;
             push(node, start, end);
             return;
         }
         int mid = (start + end) / 2;
-        update_range(2*node, start, mid, l, r, val);
-        update_range(2*node+1, mid+1, end, l, r, val);
-        tree[node] = tree[2*node] + tree[2*node+1];
+        int l = 2 * node, r = 2 * node + 1;
+        update_range(l, start, mid, L, R, val);
+        update_range(r, mid+1, end, L, R, val);
+        tree[node] = tree[l] + tree[r];
     }
     
-    ll query_range(int node, int start, int end, int l, int r) {
-        if (start > r || end < l) return 0;
+    ll query_range(int node, int start, int end, int L, int R) {
+        if (start > R || end < L) return 0;
         push(node, start, end);
-        if (start >= l && end <= r) {
+        if (start >= L && end <= R) {
             return tree[node];
         }
         int mid = (start + end) / 2;
-        ll left_sum = query_range(2*node, start, mid, l, r);
-        ll right_sum = query_range(2*node+1, mid+1, end, l, r);
+        int l = 2 * node, r = 2 * node + 1;
+        ll left_sum = query_range(l, start, mid, L, R);
+        ll right_sum = query_range(r, mid+1, end, L, R);
         return left_sum + right_sum;
     }
 
@@ -72,14 +77,14 @@ public:
         build(arr, 1, 0, n-1);
     }
     
-    // 区间更新: [l, r] 范围内每个元素加上 val
-    void update(int l, int r, ll val) {
-        update_range(1, 0, n-1, l, r, val);
+    // 区间更新: [L, R] 范围内每个元素加上 val
+    void update(int L, int R, ll val) {
+        update_range(1, 0, n-1, L, R, val);
     }
     
-    // 区间查询: 返回 [l, r] 范围内的元素和
-    ll query(int l, int r) {
-        return query_range(1, 0, n-1, l, r);
+    // 区间查询: 返回 [L, R] 范围内的元素和
+    ll query(int L, int R) {
+        return query_range(1, 0, n-1, L, R);
     }
 };
 
@@ -95,9 +100,10 @@ private:
             tree[node] = arr[start];
         } else {
             int mid = (start + end) / 2;
-            build(arr, 2*node, start, mid);
-            build(arr, 2*node+1, mid+1, end);
-            tree[node] = tree[2*node] + tree[2*node+1];
+            int l = 2 * node, r = 2 * node + 1;
+            build(arr, l, start, mid);
+            build(arr, r, mid+1, end);
+            tree[node] = tree[l] + tree[r];
         }
     }
     
@@ -105,39 +111,42 @@ private:
         if (has_set[node]) {
             tree[node] = (end - start + 1) * set_lazy[node];
             if (start != end) {
-                set_lazy[2*node] = set_lazy[node];
-                set_lazy[2*node+1] = set_lazy[node];
-                has_set[2*node] = true;
-                has_set[2*node+1] = true;
+                int l = 2 * node, r = 2 * node + 1;
+                set_lazy[l] = set_lazy[node];
+                set_lazy[r] = set_lazy[node];
+                has_set[l] = true;
+                has_set[r] = true;
             }
             has_set[node] = false;
         }
     }
     
-    void update_set(int node, int start, int end, int l, int r, ll val) {
+    void update_set(int node, int start, int end, int L, int R, ll val) {
         push(node, start, end);
-        if (start > r || end < l) return;
-        if (start >= l && end <= r) {
+        if (start > R || end < L) return;
+        if (start >= L && end <= R) {
             set_lazy[node] = val;
             has_set[node] = true;
             push(node, start, end);
             return;
         }
         int mid = (start + end) / 2;
-        update_set(2*node, start, mid, l, r, val);
-        update_set(2*node+1, mid+1, end, l, r, val);
-        tree[node] = tree[2*node] + tree[2*node+1];
+        int l = 2 * node, r = 2 * node + 1;
+        update_set(l, start, mid, L, R, val);
+        update_set(r, mid+1, end, L, R, val);
+        tree[node] = tree[l] + tree[r];
     }
     
-    ll query_range(int node, int start, int end, int l, int r) {
-        if (start > r || end < l) return 0;
+    ll query_range(int node, int start, int end, int L, int R) {
+        if (start > R || end < L) return 0;
         push(node, start, end);
-        if (start >= l && end <= r) {
+        if (start >= L && end <= R) {
             return tree[node];
         }
         int mid = (start + end) / 2;
-        ll left_sum = query_range(2*node, start, mid, l, r);
-        ll right_sum = query_range(2*node+1, mid+1, end, l, r);
+        int l = 2 * node, r = 2 * node + 1;
+        ll left_sum = query_range(l, start, mid, L, R);
+        ll right_sum = query_range(r, mid+1, end, L, R);
         return left_sum + right_sum;
     }
 
@@ -150,14 +159,14 @@ public:
         build(arr, 1, 0, n-1);
     }
     
-    // 区间赋值: [l, r] 范围内所有元素设为 val
-    void set_range(int l, int r, ll val) {
-        update_set(1, 0, n-1, l, r, val);
+    // 区间赋值: [L, R] 范围内所有元素设为 val
+    void set_range(int L, int R, ll val) {
+        update_set(1, 0, n-1, L, R, val);
     }
     
-    // 区间查询: 返回 [l, r] 范围内的元素和
-    ll query(int l, int r) {
-        return query_range(1, 0, n-1, l, r);
+    // 区间查询: 返回 [L, R] 范围内的元素和
+    ll query(int L, int R) {
+        return query_range(1, 0, n-1, L, R);
     }
 };
 
